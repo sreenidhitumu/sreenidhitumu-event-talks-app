@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="A premium interactive dashboard to view, filter, and search the latest Google Cloud BigQuery release notes.">
+    <title>BigQuery Release Notes Hub</title>
+    <!-- Fonts and Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <!-- Google Material Icons -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body class="dark-theme">
+    <!-- Background Blur Decorative Blobs -->
+    <div class="glow-blob blob-1"></div>
+    <div class="glow-blob blob-2"></div>
+
+    <div class="app-container">
+        <!-- Sidebar or Header Panel -->
+        <header class="app-header">
+            <div class="logo-area">
+                <div class="bq-logo-icon">
+                    <span class="material-symbols-outlined">database</span>
+                </div>
+                <div class="logo-text">
+                    <h1>BigQuery Release Notes</h1>
+                    <p class="subtitle">Real-time Google Cloud Updates</p>
+                </div>
+            </div>
+            
+            <div class="header-actions">
+                <!-- Theme Toggle -->
+                <button id="theme-toggle-btn" class="icon-btn" aria-label="Toggle Theme" title="Toggle Theme">
+                    <span class="material-symbols-outlined theme-icon">light_mode</span>
+                </button>
+                <!-- Refresh Button -->
+                <button id="refresh-btn" class="primary-btn" aria-label="Refresh Release Notes">
+                    <span id="refresh-icon" class="material-symbols-outlined">refresh</span>
+                    <span class="btn-text">Refresh</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Stats Bar -->
+        <section class="stats-bar" aria-label="Statistics Summary">
+            <div class="stat-card" id="stat-total-notes">
+                <span class="material-symbols-outlined stat-icon text-blue">event_note</span>
+                <div class="stat-info">
+                    <span class="stat-value" id="total-count">-</span>
+                    <span class="stat-label">Total Releases</span>
+                </div>
+            </div>
+            <div class="stat-card" id="stat-latest-date">
+                <span class="material-symbols-outlined stat-icon text-green">today</span>
+                <div class="stat-info">
+                    <span class="stat-value" id="latest-date">-</span>
+                    <span class="stat-label">Latest Update</span>
+                </div>
+            </div>
+            <div class="stat-card" id="stat-cache-status">
+                <span class="material-symbols-outlined stat-icon text-purple">history</span>
+                <div class="stat-info">
+                    <span class="stat-value" id="sync-status">Syncing...</span>
+                    <span class="stat-label" id="cache-time">Last Synced</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Main Workspace -->
+        <main class="main-content">
+            <!-- Sidebar Filters -->
+            <aside class="sidebar-filters">
+                <div class="filter-group">
+                    <label for="search-input" class="filter-label">Search Notes</label>
+                    <div class="search-box-wrapper">
+                        <span class="material-symbols-outlined search-icon">search</span>
+                        <input type="text" id="search-input" placeholder="Search keywords..." autocomplete="off">
+                        <button id="clear-search-btn" class="clear-btn" aria-label="Clear Search">
+                            <span class="material-symbols-outlined">close</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="filter-group">
+                    <div class="filter-header">
+                        <span class="filter-label">Filter by Type</span>
+                        <button id="clear-filters-btn" class="text-link-btn">Clear All</button>
+                    </div>
+                    <div id="tag-filter-list" class="tag-filters">
+                        <!-- Dynamic Tags will be populated here -->
+                        <div class="skeleton-tag"></div>
+                        <div class="skeleton-tag"></div>
+                        <div class="skeleton-tag"></div>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Release Notes List Area -->
+            <section class="releases-area" aria-label="Release Notes List">
+                <!-- Status/Error Alert -->
+                <div id="status-alert" class="alert hidden">
+                    <span class="material-symbols-outlined alert-icon">info</span>
+                    <span class="alert-message">Status message here</span>
+                </div>
+
+                <!-- Active Filter Badges Display -->
+                <div id="active-filters-row" class="active-filters-row hidden">
+                    <span class="active-filters-label">Active Filters:</span>
+                    <div id="active-filters-container" class="active-badges-list"></div>
+                </div>
+
+                <!-- Feed list container -->
+                <div id="releases-list" class="releases-list">
+                    <!-- Skeleton Cards for Loading State -->
+                    <div class="skeleton-card">
+                        <div class="skeleton-header"></div>
+                        <div class="skeleton-body"></div>
+                        <div class="skeleton-body short"></div>
+                    </div>
+                    <div class="skeleton-card">
+                        <div class="skeleton-header"></div>
+                        <div class="skeleton-body"></div>
+                        <div class="skeleton-body short"></div>
+                    </div>
+                </div>
+
+                <!-- No Results State -->
+                <div id="no-results" class="no-results-state hidden">
+                    <span class="material-symbols-outlined no-results-icon">search_off</span>
+                    <h2>No release notes found</h2>
+                    <p>Try adjusting your search terms or filter selections.</p>
+                    <button id="reset-all-btn" class="secondary-btn">Reset All Filters</button>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="app-footer">
+            <p>&copy; 2026 BigQuery Release Notes Dashboard. Built with Flask &amp; Vanilla Web Technologies.</p>
+        </footer>
+    </div>
+
+    <!-- Scripts -->
+    <script src="/static/js/main.js"></script>
+</body>
+</html>
