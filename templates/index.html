@@ -32,10 +32,15 @@
             </div>
             
             <div class="header-actions">
-                <!-- Theme Toggle -->
-                <button id="theme-toggle-btn" class="icon-btn" aria-label="Toggle Theme" title="Toggle Theme">
-                    <span class="material-symbols-outlined theme-icon">light_mode</span>
-                </button>
+                <!-- Theme Toggle Switch -->
+                <div class="theme-switch-wrapper" title="Toggle Light/Dark Theme">
+                    <span class="material-symbols-outlined theme-switch-icon">dark_mode</span>
+                    <label class="theme-switch" for="theme-toggle-checkbox">
+                        <input type="checkbox" id="theme-toggle-checkbox" aria-label="Toggle Light/Dark Theme" />
+                        <span class="slider round"></span>
+                    </label>
+                    <span class="material-symbols-outlined theme-switch-icon">light_mode</span>
+                </div>
                 <!-- Export to CSV -->
                 <button id="export-csv-btn" class="secondary-btn" aria-label="Export to CSV" title="Export Current List to CSV">
                     <span class="material-symbols-outlined">download</span>

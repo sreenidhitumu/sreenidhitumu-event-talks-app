@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // DOM ELEMENTS
     // -------------------------------------------------------------
     const body = document.body;
-    const themeToggleBtn = document.getElementById('theme-toggle-btn');
+    const themeToggleCheckbox = document.getElementById('theme-toggle-checkbox');
     const refreshBtn = document.getElementById('refresh-btn');
     const refreshIcon = document.getElementById('refresh-icon');
     const searchInput = document.getElementById('search-input');
@@ -35,47 +35,34 @@ document.addEventListener('DOMContentLoaded', () => {
     const cacheTimeVal = document.getElementById('cache-time');
 
     // -------------------------------------------------------------
-    // THEME HANDLING (Light / Dark Mode)
+    // THEME HANDLING (Light / Dark Mode Switch)
     // -------------------------------------------------------------
     const initTheme = () => {
         const savedTheme = localStorage.getItem('theme') || 'dark';
         if (savedTheme === 'light') {
             body.classList.remove('dark-theme');
             body.classList.add('light-theme');
-            updateThemeIcon('light');
+            themeToggleCheckbox.checked = true;
         } else {
             body.classList.add('dark-theme');
             body.classList.remove('light-theme');
-            updateThemeIcon('dark');
+            themeToggleCheckbox.checked = false;
         }
     };
 
-    const toggleTheme = () => {
-        if (body.classList.contains('dark-theme')) {
+    const toggleTheme = (e) => {
+        if (e.target.checked) {
             body.classList.remove('dark-theme');
             body.classList.add('light-theme');
             localStorage.setItem('theme', 'light');
-            updateThemeIcon('light');
         } else {
             body.classList.remove('light-theme');
             body.classList.add('dark-theme');
             localStorage.setItem('theme', 'dark');
-            updateThemeIcon('dark');
         }
     };
 
-    const updateThemeIcon = (theme) => {
-        const iconSpan = themeToggleBtn.querySelector('.theme-icon');
-        if (theme === 'light') {
-            iconSpan.textContent = 'dark_mode';
-            themeToggleBtn.setAttribute('title', 'Switch to Dark Mode');
-        } else {
-            iconSpan.textContent = 'light_mode';
-            themeToggleBtn.setAttribute('title', 'Switch to Light Mode');
-        }
-    };
-
-    themeToggleBtn.addEventListener('click', toggleTheme);
+    themeToggleCheckbox.addEventListener('change', toggleTheme);
 
     // -------------------------------------------------------------
     // DATA FETCHING & PARSING
