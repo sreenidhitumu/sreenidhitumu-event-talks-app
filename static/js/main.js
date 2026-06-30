@@ -24,6 +24,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const noResults = document.getElementById('no-results');
     const resetAllBtn = document.getElementById('reset-all-btn');
     const statusAlert = document.getElementById('status-alert');
+    const exportCsvBtn = document.getElementById('export-csv-btn');
+
+    let currentFilteredReleases = [];
 
     // Stats elements
     const totalCountVal = document.getElementById('total-count');
@@ -316,6 +319,8 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
+        currentFilteredReleases = filtered;
+
         // Render to DOM
         if (filtered.length === 0) {
             releasesList.classList.add('hidden');
@@ -326,7 +331,7 @@ document.addEventListener('DOMContentLoaded', () => {
         noResults.classList.add('hidden');
         releasesList.classList.remove('hidden');
 
-        releasesList.innerHTML = filtered.map(release => {
+        releasesList.innerHTML = filtered.map((release, idx) => {
             const cardClasses = ['release-card'];
             // Determine primary classes for card styling accent color
             if (release.tags) {
@@ -369,17 +374,30 @@ document.addEventListener('DOMContentLoaded', () => {
                         ${processReleaseContent(release.content)}
                     </div>
                     
-                    ${release.link ? `
                     <div class="release-actions">
+                        <button class="copy-card-btn" data-idx="${idx}" aria-label="Copy to Clipboard">
+                            <span class="material-symbols-outlined">content_copy</span>
+                            <span class="copy-btn-text">Copy text</span>
+                        </button>
+                        ${release.link ? `
                         <a href="${release.link}" target="_blank" rel="noopener noreferrer" class="release-link-btn">
-                            <span>Open in Google Cloud Docs</span>
+                            <span>Open in Docs</span>
                             <span class="material-symbols-outlined">open_in_new</span>
                         </a>
+                        ` : ''}
                     </div>
-                    ` : ''}
                 </article>
             `;
         }).join('');
+
+        // Bind copy button click events
+        document.querySelectorAll('.copy-card-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const idx = parseInt(btn.getAttribute('data-idx'));
+                const release = currentFilteredReleases[idx];
+                copyReleaseToClipboard(release, btn);
+            });
+        });
     };
 
     /**
@@ -436,10 +454,112 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // -------------------------------------------------------------
+    // UTILITY METHODS (Copy & Export)
+    // -------------------------------------------------------------
+    const copyReleaseToClipboard = (release, btn) => {
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = release.content;
+        
+        // Structure header text headers nicely in plaintext
+        tempDiv.querySelectorAll('h3').forEach(h3 => {
+            h3.textContent = `\n[${h3.textContent.toUpperCase()}]\n`;
+        });
+        
+        const plainTextContent = (tempDiv.textContent || tempDiv.innerText || '').trim();
+        
+        const formattedText = `BigQuery Release Note - ${release.title}
+Tags: ${release.tags ? release.tags.join(', ') : 'None'}
+Link: ${release.link || 'N/A'}
+--------------------------------------------------
+${plainTextContent}`;
+
+        navigator.clipboard.writeText(formattedText).then(() => {
+            const textSpan = btn.querySelector('.copy-btn-text');
+            const iconSpan = btn.querySelector('.material-symbols-outlined');
+            
+            const originalText = textSpan.textContent;
+            const originalIcon = iconSpan.textContent;
+            
+            textSpan.textContent = 'Copied!';
+            iconSpan.textContent = 'done';
+            btn.classList.add('success');
+            
+            setTimeout(() => {
+                textSpan.textContent = originalText;
+                iconSpan.textContent = originalIcon;
+                btn.classList.remove('success');
+            }, 2000);
+        }).catch(err => {
+            console.error('Failed to copy: ', err);
+            showAlert('Failed to copy to clipboard', 'error');
+        });
+    };
+
+    const exportReleasesToCsv = (filteredReleases) => {
+        if (!filteredReleases || filteredReleases.length === 0) {
+            showAlert('No release notes to export', 'error');
+            return;
+        }
+
+        const escapeCSVValue = (value) => {
+            if (value === null || value === undefined) return '';
+            let stringValue = String(value);
+            stringValue = stringValue.replace(/"/g, '""');
+            if (stringValue.includes(',') || stringValue.includes('"') || stringValue.includes('\n') || stringValue.includes('\r')) {
+                return `"${stringValue}"`;
+            }
+            return stringValue;
+        };
+
+        const headers = ['Date', 'Categories', 'GCP Link', 'Content (HTML)', 'Content (Plain Text)'];
+        
+        const rows = filteredReleases.map(release => {
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = release.content;
+            const plainText = (tempDiv.textContent || tempDiv.innerText || '').trim();
+            
+            return [
+                release.title,
+                release.tags ? release.tags.join('; ') : 'General',
+                release.link || '',
+                release.content,
+                plainText
+            ];
+        });
+
+        const csvContent = [
+            headers.map(escapeCSVValue).join(','),
+            ...rows.map(row => row.map(escapeCSVValue).join(','))
+        ].join('\n');
+
+        try {
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            const dateStr = new Date().toISOString().split('T')[0];
+            
+            link.setAttribute('href', url);
+            link.setAttribute('download', `bigquery_release_notes_${dateStr}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            showAlert('Exported CSV successfully!', 'info');
+        } catch (error) {
+            console.error('CSV Export Error:', error);
+            showAlert('Failed to export CSV: ' + error.message, 'error');
+        }
+    };
+
+    // -------------------------------------------------------------
     // INITIALIZATION & EVENT BINDINGS
     // -------------------------------------------------------------
     refreshBtn.addEventListener('click', () => {
         fetchReleases(true);
+    });
+
+    exportCsvBtn.addEventListener('click', () => {
+        exportReleasesToCsv(currentFilteredReleases);
     });
 
     initTheme();
